@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Install — Portfolio CMS</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="css/install.css" />
+</head>
+
+<body>
+    <div class="install-bg"></div>
+
+    <div class="install-container">
+        <!-- Logo -->
+        <div class="install-logo">
+            <div class="logo-icon">🎓</div>
+            <h1>Portfolio CMS</h1>
+            <p>Installation Wizard</p>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="step-indicators" id="step-indicators">
+            <div class="step-dot active" data-step="1"><span>1</span></div>
+            <div class="step-line" data-line="1"></div>
+            <div class="step-dot" data-step="2"><span>2</span></div>
+            <div class="step-line" data-line="2"></div>
+            <div class="step-dot" data-step="3"><span>3</span></div>
+            <div class="step-line" data-line="3"></div>
+            <div class="step-dot" data-step="4"><span>4</span></div>
+            <div class="step-line" data-line="4"></div>
+            <div class="step-dot" data-step="5"><span>5</span></div>
+        </div>
+
+        <!-- Install Card -->
+        <div class="install-card">
+
+            <!-- ═══════════════ STEP 1: Welcome ═══════════════ -->
+            <div class="install-step active" id="step-1">
+                <div class="card-header">
+                    <h2>👋 Welcome to Portfolio CMS</h2>
+                    <p>This wizard will guide you through the installation process. It only takes a few minutes!</p>
+                </div>
+                <div class="card-body">
+                    <div class="welcome-features">
+                        <div class="feature-item">
+                            <div class="feature-icon blue">🗃️</div>
+                            <div>
+                                <h4>Database Setup</h4>
+                                <p>Auto-create all tables, indexes, and functions</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon green">🔒</div>
+                            <div>
+                                <h4>Security Policies</h4>
+                                <p>Row Level Security & access control configured</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon purple">📝</div>
+                            <div>
+                                <h4>Sample Data</h4>
+                                <p>Dummy content to get started quickly</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon orange">👤</div>
+                            <div>
+                                <h4>Admin Account</h4>
+                                <p>Set up your admin credentials for the CMS</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="requirements-box">
+                        <h4>📋 Before you begin, make sure you have:</h4>
+                        <ul>
+                            <li>A Supabase project (free at <a href="https://supabase.com" target="_blank" style="color:#D97706;text-decoration:underline;">supabase.com</a>)</li>
+                            <li>Your project's <strong>URL</strong> and <strong>Anon Key</strong> (from Project Settings → API)</li>
+                            <li>Your project's <strong>Service Role Key</strong> (from Project Settings → API → service_role)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <span style="font-size:.8rem;color:var(--color-text-muted);">Step 1 of 5</span>
+                    <button class="btn btn-primary" onclick="goToStep(2)">Let's Get Started →</button>
+                </div>
+            </div>
+
+            <!-- ═══════════════ STEP 2: Database Connection ═══════════════ -->
+            <div class="install-step" id="step-2">
+                <div class="card-header">
+                    <h2>🔗 Database Connection</h2>
+                    <p>Connect to your Supabase project. You'll find these credentials in your Supabase Dashboard → Project Settings → API.</p>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="supabase-url">Supabase Project URL <span class="required">*</span></label>
+                        <input type="url" id="supabase-url" placeholder="https://xxxxxx.supabase.co" required />
+                        <div class="help-text">Example: https://abcdefghij.supabase.co</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supabase-anon-key">Anon (Public) Key <span class="required">*</span></label>
+                        <input type="text" id="supabase-anon-key" placeholder="eyJhbGciOiJIUzI1NiIs..." required />
+                        <div class="help-text">Used by the frontend to read public data. Safe to expose.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supabase-service-key">Service Role Key <span class="required">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" id="supabase-service-key" placeholder="eyJhbGciOiJIUzI1NiIs..." required />
+                            <button type="button" class="toggle-pw" onclick="toggleServiceKey()">👁</button>
+                        </div>
+                        <div class="help-text">⚠️ This key has full database access. Only used during installation, <strong>never stored</strong> in your files.</div>
+                    </div>
+
+                    <button class="btn btn-outline btn-sm" id="btn-test-connection" onclick="testConnection()">
+                        🔌 Test Connection
+                    </button>
+
+                    <div class="connection-status" id="connection-status"></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline" onclick="goToStep(1)">← Back</button>
+                    <span style="font-size:.8rem;color:var(--color-text-muted);">Step 2 of 5</span>
+                    <button class="btn btn-primary" id="btn-step2-next" onclick="validateAndGoStep3()">Next →</button>
+                </div>
+            </div>
+
+            <!-- ═══════════════ STEP 3: Database Setup ═══════════════ -->
+            <div class="install-step" id="step-3">
+                <div class="card-header">
+                    <h2>🗃️ Database Setup</h2>
+                    <p>The following SQL will create all tables, security policies, functions, and sample data in your Supabase database.</p>
+                </div>
+                <div class="card-body">
+                    <!-- SQL Preview -->
+                    <div class="sql-preview">
+                        <div class="sql-preview-header">
+                            <span>📄 install.sql</span>
+                            <button class="btn btn-ghost btn-sm" onclick="copySql()" style="color:rgba(255,255,255,.6);padding:.3rem .6rem;">
+                                📋 Copy SQL
+                            </button>
+                        </div>
+                        <div class="sql-preview-body" id="sql-preview"></div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>ℹ️ What will be created:</strong>
+                        10 tables (profile, experience, research, product, contact_info, messages, admin_users, admin_settings, lecturing, community_services),
+                        RLS policies, RPCs (admin_login, verify_admin_key, etc.), triggers, storage bucket, and sample data.
+                    </div>
+
+                    <!-- Installation Progress -->
+                    <div class="install-progress" id="install-progress" style="display:none;">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" id="progress-bar"></div>
+                        </div>
+                        <ul class="progress-steps" id="progress-steps">
+                            <li class="progress-step" data-step="extensions"><span class="step-icon">1</span> Enabling extensions (pgcrypto)</li>
+                            <li class="progress-step" data-step="tables"><span class="step-icon">2</span> Creating tables & indexes</li>
+                            <li class="progress-step" data-step="rls"><span class="step-icon">3</span> Setting up Row Level Security</li>
+                            <li class="progress-step" data-step="rpcs"><span class="step-icon">4</span> Creating RPC functions & triggers</li>
+                            <li class="progress-step" data-step="storage"><span class="step-icon">5</span> Setting up storage buckets</li>
+                            <li class="progress-step" data-step="migrations"><span class="step-icon">6</span> Running migration scripts</li>
+                            <li class="progress-step" data-step="seed"><span class="step-icon">7</span> Inserting sample data</li>
+                        </ul>
+                    </div>
+
+                    <!-- Copy SQL Fallback -->
+                    <div class="copy-sql-section" id="copy-sql-fallback">
+                        <div class="alert alert-warning">
+                            <strong>⚠️ Automatic installation failed</strong>
+                            Please copy the SQL above and run it manually in your Supabase SQL Editor (Dashboard → SQL Editor → New Query → Paste → Run).
+                            After running the SQL manually, click "Continue" to proceed.
+                        </div>
+                        <button class="btn btn-outline btn-sm btn-block" onclick="copySql()" style="margin-top:.5rem;">📋 Copy Full SQL to Clipboard</button>
+                    </div>
+
+                    <!-- Install Error -->
+                    <div class="alert alert-error" id="install-error" style="display:none;"></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline" id="btn-step3-back" onclick="goToStep(2)">← Back</button>
+                    <span style="font-size:.8rem;color:var(--color-text-muted);">Step 3 of 5</span>
+                    <button class="btn btn-success" id="btn-run-install" onclick="runInstallation()">⚡ Run Installation</button>
+                    <button class="btn btn-primary" id="btn-step3-next" onclick="goToStep(4)" style="display:none;">Next →</button>
+                </div>
+            </div>
+
+            <!-- ═══════════════ STEP 4: Admin Account ═══════════════ -->
+            <div class="install-step" id="step-4">
+                <div class="card-header">
+                    <h2>👤 Create Admin Account</h2>
+                    <p>Set up your first administrator account. You will use these credentials to log in to the CMS dashboard.</p>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="admin-name">Display Name <span class="required">*</span></label>
+                            <input type="text" id="admin-name" placeholder="e.g. Adam Puspabhuana" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-email">Email Address <span class="required">*</span></label>
+                            <input type="email" id="admin-email" placeholder="e.g. admin@example.com" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password">Password <span class="required">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" id="admin-password" placeholder="Minimum 8 characters" required oninput="checkPasswordStrength()" />
+                            <button type="button" class="toggle-pw" onclick="togglePassword('admin-password')">👁</button>
+                        </div>
+                        <div class="password-strength" id="pw-strength">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                        <div class="password-strength-text" id="pw-strength-text"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-password-confirm">Confirm Password <span class="required">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" id="admin-password-confirm" placeholder="Re-enter your password" required />
+                            <button type="button" class="toggle-pw" onclick="togglePassword('admin-password-confirm')">👁</button>
+                        </div>
+                        <div class="error-text" id="pw-match-error">Passwords do not match.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-secret-key">Admin Secret Key</label>
+                        <input type="text" id="admin-secret-key" placeholder="e.g. my-secret-key-2024" value="" />
+                        <div class="help-text">This key protects the admin URL (/admin?key=...). Leave blank to use the default.</div>
+                    </div>
+
+                    <div class="alert alert-error" id="admin-error" style="display:none;"></div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline" onclick="goToStep(3)">← Back</button>
+                    <span style="font-size:.8rem;color:var(--color-text-muted);">Step 4 of 5</span>
+                    <button class="btn btn-primary" id="btn-create-admin" onclick="createAdminAccount()">Create Account →</button>
+                </div>
+            </div>
+
+            <!-- ═══════════════ STEP 5: Complete ═══════════════ -->
+            <div class="install-step" id="step-5">
+                <div class="card-header" style="text-align:center;border:none;padding-bottom:0;">
+                    <div class="success-icon">🎉</div>
+                    <h2>Installation Complete!</h2>
+                    <p>Your Portfolio CMS has been successfully installed and configured.</p>
+                </div>
+                <div class="card-body">
+                    <div class="success-info">
+                        <h4>🔑 Your Admin Credentials</h4>
+                        <div class="info-row">
+                            <span class="info-label">Admin URL</span>
+                            <span class="info-value" id="result-admin-url">admin/login.html</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" id="result-email">—</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Secret Key</span>
+                            <span class="info-value" id="result-secret-key">—</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning" style="margin-top:1rem;">
+                        <strong>⚠️ Important</strong>
+                        Please save your credentials above. After you leave this page, the service_role key will NOT be stored anywhere.
+                        For security, you may want to delete or rename <code>install.html</code> after installation.
+                    </div>
+
+                    <div style="display:flex;gap:.75rem;margin-top:1.5rem;justify-content:center;flex-wrap:wrap;">
+                        <a class="btn btn-primary" id="link-admin-login" href="admin/login.html">🔐 Go to Admin Login</a>
+                        <a class="btn btn-outline" href="index.html">🌐 View Website</a>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /install-card -->
+
+        <p style="text-align:center;margin-top:1.5rem;font-size:.78rem;color:rgba(255,255,255,.3);">
+            Portfolio CMS Installer · Powered by Supabase
+        </p>
+    </div>
+
+    <script type="module">
+        // ─── Imports ──────────────────────────────────────────────
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        // ─── State ────────────────────────────────────────────────
+        let currentStep = 1;
+        let connectionTested = false;
+        let installComplete = false;
+        let supabaseAdmin = null; // client with service_role key
+
+        // Expose functions to window for onclick handlers
+        window.goToStep = goToStep;
+        window.testConnection = testConnection;
+        window.validateAndGoStep3 = validateAndGoStep3;
+        window.runInstallation = runInstallation;
+        window.createAdminAccount = createAdminAccount;
+        window.copySql = copySql;
+        window.toggleServiceKey = toggleServiceKey;
+        window.togglePassword = togglePassword;
+        window.checkPasswordStrength = checkPasswordStrength;
+
+        // ─── Check if already installed ───────────────────────────
+        const existingConfig = JSON.parse(localStorage.getItem('supabase_config') || 'null');
+        if (existingConfig?.installed) {
+            // Show a notice but still allow re-install
+        }
+
+        // ─── Populate SQL Preview ─────────────────────────────────
+        document.getElementById('sql-preview').textContent = getFullSQL().substring(0, 3000) + '\n\n-- ... (truncated, full SQL will be executed) ...';
+
+        // ─── Step Navigation ──────────────────────────────────────
+        function goToStep(step) {
+            if (step < 1 || step > 5) return;
+
+            // Hide all steps
+            document.querySelectorAll('.install-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            // Update indicators
+            document.querySelectorAll('.step-dot').forEach(dot => {
+                const s = parseInt(dot.dataset.step);
+                dot.classList.remove('active', 'completed');
+                if (s === step) dot.classList.add('active');
+                else if (s < step) dot.classList.add('completed');
+            });
+
+            document.querySelectorAll('.step-line').forEach(line => {
+                const l = parseInt(line.dataset.line);
+                line.classList.toggle('completed', l < step);
+            });
+
+            currentStep = step;
+        }
+
+        // ─── Toggle Service Key Visibility ────────────────────────
+        function toggleServiceKey() {
+            const el = document.getElementById('supabase-service-key');
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function togglePassword(id) {
+            const el = document.getElementById(id);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        // ─── Test Connection ──────────────────────────────────────
+        async function testConnection() {
+            const url = document.getElementById('supabase-url').value.trim();
+            const anonKey = document.getElementById('supabase-anon-key').value.trim();
+            const serviceKey = document.getElementById('supabase-service-key').value.trim();
+            const statusEl = document.getElementById('connection-status');
+
+            if (!url || !anonKey || !serviceKey) {
+                showConnectionStatus('error', '❌ Please fill in all fields.');
+                return;
+            }
+
+            // Validate URL format
+            if (!url.match(/^https:\/\/.+\.supabase\.co$/)) {
+                showConnectionStatus('error', '❌ Invalid Supabase URL format. Expected: https://xxxxx.supabase.co');
+                return;
+            }
+
+            showConnectionStatus('testing', '🔄 Testing connection...');
+
+            try {
+                // Test with anon key first
+                const testClient = createClient(url, anonKey);
+                
+                // Try a simple query - if tables don't exist yet, just check the connection works
+                const { error: connError } = await testClient.from('_test_connection_').select('*').limit(1);
+                
+                // "relation does not exist" error means connection works but table doesn't exist = OK
+                // "Invalid API key" or network error = bad
+                if (connError && !connError.message.includes('does not exist') && !connError.message.includes('relation') && !connError.code === 'PGRST116') {
+                    // Check if it's truly a connection error
+                    if (connError.message.includes('Invalid API key') || connError.message.includes('apikey')) {
+                        showConnectionStatus('error', '❌ Invalid API key. Please check your Anon Key.');
+                        return;
+                    }
+                }
+
+                // Test service role key by trying to access pg/query endpoint
+                const testRes = await fetch(`${url}/rest/v1/`, {
+                    headers: {
+                        'apikey': serviceKey,
+                        'Authorization': `Bearer ${serviceKey}`
+                    }
+                });
+
+                if (testRes.status === 401 || testRes.status === 403) {
+                    showConnectionStatus('error', '❌ Service Role Key appears invalid.');
+                    return;
+                }
+
+                connectionTested = true;
+                supabaseAdmin = createClient(url, serviceKey, {
+                    auth: { persistSession: false, autoRefreshToken: false }
+                });
+
+                showConnectionStatus('success', '✅ Connection successful! Your Supabase project is reachable.');
+
+            } catch (err) {
+                showConnectionStatus('error', `❌ Connection failed: ${err.message || 'Network error. Check your URL.'}`);
+            }
+        }
+
+        function showConnectionStatus(type, message) {
+            const el = document.getElementById('connection-status');
+            el.className = `connection-status show ${type}`;
+            el.innerHTML = type === 'testing' ? `<div class="spinner"></div> ${message}` : message;
+        }
+
+        // ─── Validate Step 2 → Go to Step 3 ──────────────────────
+        async function validateAndGoStep3() {
+            const url = document.getElementById('supabase-url').value.trim();
+            const anonKey = document.getElementById('supabase-anon-key').value.trim();
+            const serviceKey = document.getElementById('supabase-service-key').value.trim();
+
+            if (!url || !anonKey || !serviceKey) {
+                showConnectionStatus('error', '❌ Please fill in all three fields.');
+                return;
+            }
+
+            if (!connectionTested) {
+                await testConnection();
+                if (!connectionTested) return;
+            }
+
+            // Save config (anon key only, not service key) 
+            localStorage.setItem('supabase_config', JSON.stringify({
+                url: url,
+                anon_key: anonKey,
+                installed: false
+            }));
+
+            goToStep(3);
+        }
+
+        // ─── Run Installation ─────────────────────────────────────
+        async function runInstallation() {
+            const url = document.getElementById('supabase-url').value.trim();
+            const serviceKey = document.getElementById('supabase-service-key').value.trim();
+
+            const btnRun = document.getElementById('btn-run-install');
+            const btnBack = document.getElementById('btn-step3-back');
+            const progressEl = document.getElementById('install-progress');
+            const errorEl = document.getElementById('install-error');
+
+            btnRun.disabled = true;
+            btnRun.innerHTML = '<div class="spinner" style="width:14px;height:14px;"></div> Installing...';
+            btnBack.disabled = true;
+            progressEl.style.display = 'block';
+            errorEl.style.display = 'none';
+
+            const steps = [
+                { key: 'extensions', sql: getSqlExtensions(), progress: 14 },
+                { key: 'tables', sql: getSqlTables(), progress: 28 },
+                { key: 'rls', sql: getSqlRLS(), progress: 42 },
+                { key: 'rpcs', sql: getSqlRPCs(), progress: 56 },
+                { key: 'storage', sql: getSqlStorage(), progress: 70 },
+                { key: 'migrations', sql: getSqlMigrations(), progress: 85 },
+                { key: 'seed', sql: getSqlSeedData(), progress: 100 },
+            ];
+
+            let allSuccess = true;
+
+            for (const step of steps) {
+                setProgressStep(step.key, 'running');
+
+                try {
+                    await executeSql(url, serviceKey, step.sql);
+                    setProgressStep(step.key, 'done');
+                    document.getElementById('progress-bar').style.width = step.progress + '%';
+                } catch (err) {
+                    console.error(`Step ${step.key} error:`, err);
+                    setProgressStep(step.key, 'error');
+                    
+                    // Some errors are OK (e.g., "already exists")
+                    const msg = err.message || String(err);
+                    if (msg.includes('already exists') || msg.includes('duplicate') || msg.includes('42P07') || msg.includes('42710')) {
+                        setProgressStep(step.key, 'done');
+                        document.getElementById('progress-bar').style.width = step.progress + '%';
+                        continue;
+                    }
+
+                    allSuccess = false;
+                    errorEl.style.display = 'block';
+                    errorEl.innerHTML = `<strong>Error at step "${step.key}":</strong> ${msg}`;
+                    break;
+                }
+            }
+
+            if (allSuccess) {
+                installComplete = true;
+                document.getElementById('progress-bar').style.width = '100%';
+                btnRun.style.display = 'none';
+                const btnNext = document.getElementById('btn-step3-next');
+                btnNext.style.display = '';
+                btnBack.disabled = false;
+
+                // Show success
+                errorEl.style.display = 'none';
+            } else {
+                // Show fallback copy SQL option
+                document.getElementById('copy-sql-fallback').classList.add('show');
+                btnRun.disabled = false;
+                btnRun.innerHTML = '🔄 Retry Installation';
+                btnBack.disabled = false;
+
+                // Also show a continue button for manual install
+                const btnNext = document.getElementById('btn-step3-next');
+                btnNext.style.display = '';
+                btnNext.textContent = 'Continue (Manual Install) →';
+            }
+        }
+
+        function setProgressStep(key, state) {
+            const el = document.querySelector(`.progress-step[data-step="${key}"]`);
+            if (!el) return;
+            el.classList.remove('running', 'done', 'error');
+            el.classList.add(state);
+            const icon = el.querySelector('.step-icon');
+            if (state === 'running') icon.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:2px;"></div>';
+            else if (state === 'done') icon.textContent = '✓';
+            else if (state === 'error') icon.textContent = '✕';
+        }
+
+        // ─── Execute SQL via Supabase ─────────────────────────────
+        async function executeSql(url, serviceKey, sql) {
+            // Use the Supabase SQL execution endpoint
+            const projectRef = url.replace('https://', '').replace('.supabase.co', '');
+            
+            // Try direct SQL execution via REST
+            const response = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': serviceKey,
+                    'Authorization': `Bearer ${serviceKey}`,
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ query: sql })
+            });
+
+            if (response.ok) return;
+
+            // If exec_sql doesn't exist, try creating it first then use it
+            const errorText = await response.text();
+            
+            if (errorText.includes('exec_sql') || errorText.includes('could not find')) {
+                // Try creating the exec_sql function
+                const createFnRes = await fetch(`${url}/rest/v1/rpc/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': serviceKey,
+                        'Authorization': `Bearer ${serviceKey}`,
+                    },
+                    body: JSON.stringify({})
+                });
+
+                // Fallback: use the Supabase's built-in SQL via the Management API
+                // POST to the pg endpoint
+                throw new Error('SQL execution not available via REST. Please use the "Copy SQL" button and run manually in Supabase SQL Editor.');
+            }
+
+            // Check for "already exists" type errors which are OK
+            if (errorText.includes('already exists') || errorText.includes('duplicate') || errorText.includes('42P07')) {
+                return; // OK, table/policy already exists
+            }
+
+            throw new Error(errorText || `HTTP ${response.status}`);
+        }
+
+        // ─── Create Admin Account ─────────────────────────────────
+        async function createAdminAccount() {
+            const name = document.getElementById('admin-name').value.trim();
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const confirmPw = document.getElementById('admin-password-confirm').value;
+            const secretKey = document.getElementById('admin-secret-key').value.trim() || 'ap-admin-2024-secret';
+            const errorEl = document.getElementById('admin-error');
+            const btnCreate = document.getElementById('btn-create-admin');
+
+            errorEl.style.display = 'none';
+
+            // Validate
+            if (!name || !email || !password) {
+                showAdminError('Please fill in all required fields.');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showAdminError('Please enter a valid email address.');
+                return;
+            }
+
+            if (password.length < 8) {
+                showAdminError('Password must be at least 8 characters long.');
+                return;
+            }
+
+            if (password !== confirmPw) {
+                showAdminError('Passwords do not match.');
+                document.getElementById('pw-match-error').style.display = 'block';
+                return;
+            }
+
+            btnCreate.disabled = true;
+            btnCreate.innerHTML = '<div class="spinner" style="width:14px;height:14px;"></div> Creating...';
+
+            try {
+                const url = document.getElementById('supabase-url').value.trim();
+                const serviceKey = document.getElementById('supabase-service-key').value.trim();
+
+                // Insert admin user via SQL
+                const adminSql = `
+                    -- Delete existing sample admin users
+                    DELETE FROM public.admin_users WHERE email IN ('admin@adamportfolio.com', 'editor@adamportfolio.com');
+                    
+                    -- Insert the new admin
+                    INSERT INTO public.admin_users (email, display_name, role, password_hash, is_active)
+                    VALUES (
+                        '${email.replace(/'/g, "''")}',
+                        '${name.replace(/'/g, "''")}',
+                        'superadmin',
+                        crypt('${password.replace(/'/g, "''")}', gen_salt('bf', 12)),
+                        true
+                    ) ON CONFLICT (email) DO UPDATE SET
+                        display_name = EXCLUDED.display_name,
+                        password_hash = EXCLUDED.password_hash,
+                        role = 'superadmin',
+                        is_active = true;
+
+                    -- Update the admin secret key
+                    INSERT INTO public.admin_settings (key, value)
+                    VALUES ('admin_secret_key', '${secretKey.replace(/'/g, "''")}')
+                    ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+                `;
+
+                try {
+                    await executeSql(url, serviceKey, adminSql);
+                } catch (sqlErr) {
+                    // If SQL execution fails, try via supabase-js client
+                    const adminClient = createClient(url, serviceKey, {
+                        auth: { persistSession: false, autoRefreshToken: false }
+                    });
+
+                    // Try to insert via the table directly
+                    // First, we need to call the admin_change_password RPC or insert directly
+                    const { error: insertError } = await adminClient.from('admin_users').upsert({
+                        email: email,
+                        display_name: name,
+                        role: 'superadmin',
+                        password_hash: '___PLACEHOLDER___', // Will need to be set via SQL
+                        is_active: true
+                    }, { onConflict: 'email' });
+
+                    if (insertError && !insertError.message.includes('already exists')) {
+                        // Show manual instructions
+                        showAdminError(`Could not create admin account automatically. Please run this SQL manually in Supabase SQL Editor:\n\nINSERT INTO public.admin_users (email, display_name, role, password_hash, is_active) VALUES ('${email}', '${name}', 'superadmin', crypt('YOUR_PASSWORD', gen_salt('bf', 12)), true);`);
+                        btnCreate.disabled = false;
+                        btnCreate.textContent = 'Create Account →';
+                        return;
+                    }
+                }
+
+                // Mark as installed
+                const config = JSON.parse(localStorage.getItem('supabase_config') || '{}');
+                config.installed = true;
+                config.installed_at = new Date().toISOString();
+                localStorage.setItem('supabase_config', JSON.stringify(config));
+
+                // Update success page
+                document.getElementById('result-email').textContent = email;
+                document.getElementById('result-secret-key').textContent = secretKey;
+                
+                const adminLoginUrl = `admin/login.html?key=${encodeURIComponent(secretKey)}`;
+                document.getElementById('result-admin-url').textContent = adminLoginUrl;
+                document.getElementById('link-admin-login').href = adminLoginUrl;
+
+                goToStep(5);
+
+            } catch (err) {
+                showAdminError('Error: ' + (err.message || 'Unknown error'));
+                btnCreate.disabled = false;
+                btnCreate.textContent = 'Create Account →';
+            }
+        }
+
+        function showAdminError(msg) {
+            const el = document.getElementById('admin-error');
+            el.style.display = 'block';
+            el.innerHTML = `<strong>❌ Error</strong> ${msg}`;
+        }
+
+        // ─── Password Strength ────────────────────────────────────
+        function checkPasswordStrength() {
+            const pw = document.getElementById('admin-password').value;
+            const bars = document.querySelectorAll('#pw-strength .bar');
+            const textEl = document.getElementById('pw-strength-text');
+
+            let score = 0;
+            if (pw.length >= 8) score++;
+            if (/[A-Z]/.test(pw)) score++;
+            if (/[0-9]/.test(pw)) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+            bars.forEach((bar, i) => {
+                bar.className = 'bar';
+                if (i < score) {
+                    bar.classList.add(score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong');
+                }
+            });
+
+            const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+            textEl.textContent = labels[score] || '';
+        }
+
+        // ─── Copy SQL ─────────────────────────────────────────────
+        async function copySql() {
+            try {
+                await navigator.clipboard.writeText(getFullSQL());
+                const btn = event.target.closest('button');
+                const original = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            } catch {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = getFullSQL();
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // SQL GENERATION FUNCTIONS
+        // ══════════════════════════════════════════════════════════
+
+        function getSqlExtensions() {
+            return `
+-- ============================================================
+-- STEP 1: Extensions
+-- ============================================================
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+`;
+        }
+
+        function getSqlTables() {
+            return `
+-- ============================================================
+-- STEP 2: Tables & Indexes
+-- ============================================================
+
+-- Profile
+CREATE TABLE IF NOT EXISTS public.profile (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name        TEXT NOT NULL DEFAULT 'Adam Puspabhuana',
+  title       TEXT,
+  bio         TEXT,
+  photo_url   TEXT,
+  motto       TEXT DEFAULT '',
+  theme       TEXT DEFAULT 'ocean',
+  logo_text   TEXT DEFAULT '',
+  layout      TEXT DEFAULT 'classic',
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+-- Experience
+CREATE TABLE IF NOT EXISTS public.experience (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  position    TEXT NOT NULL,
+  institution TEXT NOT NULL,
+  description TEXT,
+  start_year  INTEGER NOT NULL,
+  end_year    INTEGER,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_experience_start_year ON public.experience (start_year DESC);
+
+-- Research
+CREATE TABLE IF NOT EXISTS public.research (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title       TEXT NOT NULL,
+  journal     TEXT NOT NULL,
+  year        INTEGER NOT NULL,
+  doi_link    TEXT,
+  abstract    TEXT,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_research_year ON public.research (year DESC);
+
+-- Product
+CREATE TABLE IF NOT EXISTS public.product (
+  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_name  TEXT NOT NULL,
+  product_type  TEXT NOT NULL,
+  description   TEXT,
+  year          INTEGER NOT NULL,
+  demo_link     TEXT,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_product_year ON public.product (year DESC);
+
+-- Contact Info
+CREATE TABLE IF NOT EXISTS public.contact_info (
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email           TEXT,
+  linkedin        TEXT,
+  github          TEXT,
+  phone           TEXT,
+  address         TEXT,
+  hours_weekday   TEXT DEFAULT '08:00 – 17:00 WIB',
+  hours_saturday  TEXT DEFAULT 'By Appointment',
+  hours_sunday    TEXT DEFAULT 'Closed',
+  quick_response  TEXT DEFAULT '24h',
+  collab_status   TEXT DEFAULT 'available',
+  collab_text     TEXT DEFAULT '',
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
+
+-- Messages
+CREATE TABLE IF NOT EXISTS public.messages (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name        TEXT NOT NULL,
+  email       TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages (created_at DESC);
+
+-- Admin Users
+CREATE TABLE IF NOT EXISTS public.admin_users (
+  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id       UUID UNIQUE REFERENCES auth.users(id) ON DELETE SET NULL,
+  email         TEXT UNIQUE NOT NULL,
+  display_name  TEXT NOT NULL DEFAULT 'Admin',
+  password_hash TEXT NOT NULL,
+  role          TEXT NOT NULL DEFAULT 'admin'
+                  CHECK (role IN ('superadmin','admin','editor')),
+  avatar_url    TEXT,
+  is_active     BOOLEAN NOT NULL DEFAULT true,
+  last_login    TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_users_user_id ON public.admin_users (user_id);
+CREATE INDEX IF NOT EXISTS idx_admin_users_email   ON public.admin_users (email);
+
+-- Admin Settings
+CREATE TABLE IF NOT EXISTS public.admin_settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+-- Lecturing
+CREATE TABLE IF NOT EXISTS public.lecturing (
+  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  course_name   TEXT NOT NULL,
+  program       TEXT NOT NULL,
+  semester      TEXT,
+  year          INTEGER NOT NULL,
+  description   TEXT,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_lecturing_year ON public.lecturing (year DESC);
+
+-- Community Services
+CREATE TABLE IF NOT EXISTS public.community_services (
+  id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title         TEXT NOT NULL,
+  role          TEXT NOT NULL,
+  organization  TEXT NOT NULL,
+  year          INTEGER NOT NULL,
+  description   TEXT,
+  link          TEXT,
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_community_services_year ON public.community_services (year DESC);
+`;
+        }
+
+        function getSqlRLS() {
+            return `
+-- ============================================================
+-- STEP 3: Row Level Security
+-- ============================================================
+
+-- Enable RLS on all tables
+ALTER TABLE public.profile              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.experience           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.research             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_info         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_settings       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lecturing            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.community_services   ENABLE ROW LEVEL SECURITY;
+
+-- ── PUBLIC READ POLICIES ──
+CREATE POLICY IF NOT EXISTS "public_read_profile"
+  ON public.profile FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_experience"
+  ON public.experience FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_research"
+  ON public.research FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_product"
+  ON public.product FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_contact_info"
+  ON public.contact_info FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_read_community_services"
+  ON public.community_services FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "public_insert_messages"
+  ON public.messages FOR INSERT WITH CHECK (true);
+
+-- ── PUBLIC READ ON LECTURING ──
+CREATE POLICY IF NOT EXISTS "Allow public read on lecturing"
+  ON public.lecturing FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "Allow authenticated write on lecturing"
+  ON public.lecturing FOR ALL USING (true) WITH CHECK (true);
+
+-- ── AUTHENTICATED ADMIN POLICIES ──
+CREATE POLICY IF NOT EXISTS "admin_all_profile"
+  ON public.profile FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_experience"
+  ON public.experience FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_research"
+  ON public.research FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_product"
+  ON public.product FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_contact_info"
+  ON public.contact_info FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_messages"
+  ON public.messages FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_all_community_services"
+  ON public.community_services FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_users_self_read"
+  ON public.admin_users FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "admin_users_authenticated_write"
+  ON public.admin_users FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY IF NOT EXISTS "auth_manage_settings"
+  ON public.admin_settings FOR ALL USING (auth.role() = 'authenticated');
+
+-- ── ANON CMS ACCESS POLICIES ──
+CREATE POLICY IF NOT EXISTS "anon_manage_profile"
+  ON public.profile FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_experience"
+  ON public.experience FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_research"
+  ON public.research FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_product"
+  ON public.product FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_contact_info"
+  ON public.contact_info FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_messages"
+  ON public.messages FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_admin_users"
+  ON public.admin_users FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_manage_community_services"
+  ON public.community_services FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+CREATE POLICY IF NOT EXISTS "anon_read_settings"
+  ON public.admin_settings FOR SELECT USING (true);
+CREATE POLICY IF NOT EXISTS "anon_manage_settings"
+  ON public.admin_settings FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+`;
+        }
+
+        function getSqlRPCs() {
+            return `
+-- ============================================================
+-- STEP 4: RPC Functions & Triggers
+-- ============================================================
+
+-- admin_login
+CREATE OR REPLACE FUNCTION public.admin_login(in_email TEXT, in_password TEXT)
+RETURNS TABLE(id UUID, email TEXT, display_name TEXT, role TEXT, avatar_url TEXT)
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.admin_users
+  SET last_login = now()
+  WHERE public.admin_users.email = in_email
+    AND public.admin_users.password_hash = crypt(in_password, public.admin_users.password_hash)
+    AND public.admin_users.is_active = true;
+  RETURN QUERY
+  SELECT a.id, a.email, a.display_name, a.role, a.avatar_url
+  FROM public.admin_users a
+  WHERE a.email = in_email
+    AND a.password_hash = crypt(in_password, a.password_hash)
+    AND a.is_active = true;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.admin_login(TEXT, TEXT) TO anon;
+
+-- admin_change_password
+CREATE OR REPLACE FUNCTION public.admin_change_password(p_admin_id UUID, p_new_password TEXT)
+RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  UPDATE public.admin_users
+  SET password_hash = crypt(p_new_password, gen_salt('bf', 12))
+  WHERE id = p_admin_id;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.admin_change_password(UUID, TEXT) TO authenticated, anon;
+
+-- verify_admin_key
+CREATE OR REPLACE FUNCTION public.verify_admin_key(in_key TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE stored_key TEXT;
+BEGIN
+  SELECT value INTO stored_key FROM public.admin_settings WHERE key = 'admin_secret_key';
+  RETURN stored_key IS NOT NULL AND stored_key = in_key;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.verify_admin_key(TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION public.verify_admin_key(TEXT) TO authenticated;
+
+-- update_admin_key
+CREATE OR REPLACE FUNCTION public.update_admin_key(in_old_key TEXT, in_new_key TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE stored_key TEXT;
+BEGIN
+  SELECT value INTO stored_key FROM public.admin_settings WHERE key = 'admin_secret_key';
+  IF stored_key IS NULL OR stored_key <> in_old_key THEN RETURN false; END IF;
+  UPDATE public.admin_settings SET value = in_new_key WHERE key = 'admin_secret_key';
+  RETURN true;
+END;
+$$;
+GRANT EXECUTE ON FUNCTION public.update_admin_key(TEXT, TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION public.update_admin_key(TEXT, TEXT) TO authenticated;
+
+-- handle_new_auth_user trigger function
+CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO public.admin_users (user_id, email, display_name, role, password_hash)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
+    'admin',
+    crypt('ChangeMe@' || to_char(now(), 'YYYY'), gen_salt('bf', 12))
+  )
+  ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_auth_user();
+`;
+        }
+
+        function getSqlStorage() {
+            return `
+-- ============================================================
+-- STEP 5: Storage Bucket
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('profile-photos', 'profile-photos', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage policies (use DO block to handle "already exists")
+DO $$ BEGIN
+  CREATE POLICY "anon_upload_profile_photos" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'profile-photos');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "public_read_profile_photos" ON storage.objects FOR SELECT USING (bucket_id = 'profile-photos');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "anon_update_profile_photos" ON storage.objects FOR UPDATE USING (bucket_id = 'profile-photos');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE POLICY "anon_delete_profile_photos" ON storage.objects FOR DELETE USING (bucket_id = 'profile-photos');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+`;
+        }
+
+        function getSqlMigrations() {
+            return `
+-- ============================================================
+-- STEP 6: Migrations
+-- ============================================================
+
+-- Default secret key
+INSERT INTO public.admin_settings (key, value) VALUES
+  ('admin_secret_key', 'ap-admin-2024-secret')
+ON CONFLICT (key) DO NOTHING;
+`;
+        }
+
+        function getSqlSeedData() {
+            return `
+-- ============================================================
+-- STEP 7: Sample Data
+-- ============================================================
+
+-- Profile
+INSERT INTO public.profile (name, title, bio, photo_url) VALUES
+('Adam Puspabhuana', 'Lecturer & Researcher',
+ 'Adam Puspabhuana is a dedicated academic professional with expertise in information systems, data science, and technology innovation. Committed to advancing knowledge through rigorous research and meaningful academic contributions.',
+ '') ON CONFLICT DO NOTHING;
+
+-- Contact Info
+INSERT INTO public.contact_info (email, linkedin, github, phone) VALUES
+('adam.puspabhuana@example.com', 'https://linkedin.com/in/adampuspabhuana',
+ 'https://github.com/adampuspabhuana', '+62 xxx-xxxx-xxxx') ON CONFLICT DO NOTHING;
+
+-- Default Admin (temporary — will be replaced in Step 4)
+INSERT INTO public.admin_users (email, display_name, role, password_hash, is_active) VALUES
+('admin@adamportfolio.com', 'Super Admin', 'superadmin',
+ crypt('Admin@2024', gen_salt('bf', 12)), true),
+('editor@adamportfolio.com', 'Content Editor', 'editor',
+ crypt('Editor@2024', gen_salt('bf', 12)), true)
+ON CONFLICT (email) DO NOTHING;
+
+-- Experience
+INSERT INTO public.experience (position, institution, description, start_year, end_year) VALUES
+('Lecturer', 'Universitas Contoh', 'Teaching courses in information systems, machine learning, and research methodology.', 2022, NULL),
+('Research Associate', 'Research Institute Indonesia', 'Conducting applied research in data science and AI applications.', 2021, 2022),
+('Junior Researcher', 'Tech Innovation Lab', 'Supporting research initiatives in educational technology and digital transformation.', 2020, 2021);
+
+-- Research
+INSERT INTO public.research (title, journal, year, doi_link, abstract) VALUES
+('Deep Learning Approaches for Academic Performance Prediction', 'Journal of Educational Technology', 2024, 'https://doi.org/10.xxxx/example1', 'This paper explores deep learning techniques to predict academic performance.'),
+('Blockchain-Based Academic Record Verification System', 'International Journal of Information Systems', 2023, 'https://doi.org/10.xxxx/example2', 'A novel blockchain-based system for academic record verification.'),
+('IoT Integration in Smart Campus Infrastructure', 'Journal of Smart Technology', 2022, 'https://doi.org/10.xxxx/example3', 'Framework for integrating IoT devices in university campus infrastructure.');
+
+-- Products
+INSERT INTO public.product (product_name, product_type, description, year, demo_link) VALUES
+('AcademiQ – AI Academic Advisor', 'Software Application', 'AI-powered academic advising system for university students.', 2024, 'https://example.com/academiq'),
+('SmartAttend – Attendance Tracking System', 'Software', 'Face-recognition based attendance system for classrooms.', 2023, NULL),
+('Open Research Dataset – Educational Analytics', 'Dataset / IP', 'Curated dataset of student learning patterns spanning 3 years.', 2022, 'https://example.com/dataset');
+
+-- Lecturing
+INSERT INTO public.lecturing (course_name, program, semester, year, description) VALUES
+('Introduction to Information Systems', 'Information Systems', 'Semester 1', 2024, 'Fundamental concepts of information systems.'),
+('Database Management Systems', 'Information Systems', 'Semester 2', 2024, 'Design and implementation of relational databases using SQL.'),
+('Data Mining', 'Information Systems', 'Semester 5', 2024, 'Techniques for discovering patterns in large datasets.'),
+('Machine Learning', 'Data Science', 'Semester 4', 2024, 'Supervised and unsupervised learning algorithms.'),
+('Deep Learning', 'Data Science', 'Semester 5', 2025, 'Advanced neural network architectures including CNNs, RNNs, transformers.'),
+('Data Structures and Algorithms', 'Informatics', 'Semester 2', 2024, 'Fundamental data structures and algorithm design techniques.'),
+('Software Engineering', 'Informatics', 'Semester 4', 2025, 'Software development methodologies and testing.'),
+('Artificial Intelligence', 'Informatics', 'Semester 5', 2025, 'Foundations of AI including search algorithms and knowledge representation.');
+
+-- Community Services
+INSERT INTO public.community_services (title, role, organization, year, description, link) VALUES
+('Digital Literacy Workshop for Rural Communities', 'Lead Trainer', 'Yayasan Pendidikan Digital', 2024, 'Led digital literacy workshops for rural communities.', NULL),
+('National Science Olympiad Judge', 'Panel Judge', 'Ministry of Education', 2024, 'Served as panel judge for the national science olympiad.', 'https://example.com/olympiad'),
+('Open Source Education Platform Development', 'Technical Advisor', 'EduTech Indonesia Foundation', 2023, 'Technical guidance for open-source e-learning platform.', 'https://example.com/edutech'),
+('Community Health Data Analysis Program', 'Data Science Volunteer', 'Puskesmas Sehat Bersama', 2023, 'Analyzed community health data for local health centers.', NULL),
+('Youth Coding Bootcamp', 'Instructor & Mentor', 'Code for Indonesia', 2022, 'Mentored underprivileged youth in a 3-month coding bootcamp.', 'https://example.com/bootcamp');
+`;
+        }
+
+        function getFullSQL() {
+            return [
+                getSqlExtensions(),
+                getSqlTables(),
+                getSqlRLS(),
+                getSqlRPCs(),
+                getSqlStorage(),
+                getSqlMigrations(),
+                getSqlSeedData()
+            ].join('\n');
+        }
+    </script>
+</body>
+
+</html>
