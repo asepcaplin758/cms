@@ -467,65 +467,88 @@
             progressEl.style.display = 'block';
             errorEl.style.display = 'none';
 
-            const steps = [
-                { key: 'extensions', sql: getSqlExtensions(), progress: 14 },
-                { key: 'tables', sql: getSqlTables(), progress: 28 },
-                { key: 'rls', sql: getSqlRLS(), progress: 42 },
-                { key: 'rpcs', sql: getSqlRPCs(), progress: 56 },
-                { key: 'storage', sql: getSqlStorage(), progress: 70 },
-                { key: 'migrations', sql: getSqlMigrations(), progress: 85 },
-                { key: 'seed', sql: getSqlSeedData(), progress: 100 },
-            ];
+            // Try to execute the full SQL in one go first
+            const fullSql = getFullSQL();
 
-            let allSuccess = true;
+            try {
+                await executeSql(url, serviceKey, fullSql);
 
-            for (const step of steps) {
-                setProgressStep(step.key, 'running');
-
-                try {
-                    await executeSql(url, serviceKey, step.sql);
-                    setProgressStep(step.key, 'done');
-                    document.getElementById('progress-bar').style.width = step.progress + '%';
-                } catch (err) {
-                    console.error(`Step ${step.key} error:`, err);
-                    setProgressStep(step.key, 'error');
-                    
-                    // Some errors are OK (e.g., "already exists")
-                    const msg = err.message || String(err);
-                    if (msg.includes('already exists') || msg.includes('duplicate') || msg.includes('42P07') || msg.includes('42710')) {
-                        setProgressStep(step.key, 'done');
-                        document.getElementById('progress-bar').style.width = step.progress + '%';
-                        continue;
-                    }
-
-                    allSuccess = false;
-                    errorEl.style.display = 'block';
-                    errorEl.innerHTML = `<strong>Error at step "${step.key}":</strong> ${msg}`;
-                    break;
-                }
-            }
-
-            if (allSuccess) {
-                installComplete = true;
+                // All done in one shot!
+                const allSteps = ['extensions', 'tables', 'rls', 'rpcs', 'storage', 'migrations', 'seed'];
+                allSteps.forEach(key => setProgressStep(key, 'done'));
                 document.getElementById('progress-bar').style.width = '100%';
+
+                installComplete = true;
                 btnRun.style.display = 'none';
                 const btnNext = document.getElementById('btn-step3-next');
                 btnNext.style.display = '';
                 btnBack.disabled = false;
-
-                // Show success
                 errorEl.style.display = 'none';
-            } else {
-                // Show fallback copy SQL option
-                document.getElementById('copy-sql-fallback').classList.add('show');
-                btnRun.disabled = false;
-                btnRun.innerHTML = '🔄 Retry Installation';
-                btnBack.disabled = false;
 
-                // Also show a continue button for manual install
-                const btnNext = document.getElementById('btn-step3-next');
-                btnNext.style.display = '';
-                btnNext.textContent = 'Continue (Manual Install) →';
+            } catch (err) {
+                console.error('Full SQL execution failed:', err);
+                
+                // Try step-by-step execution
+                const steps = [
+                    { key: 'extensions', sql: getSqlExtensions(), progress: 14 },
+                    { key: 'tables', sql: getSqlTables(), progress: 28 },
+                    { key: 'rls', sql: getSqlRLS(), progress: 42 },
+                    { key: 'rpcs', sql: getSqlRPCs(), progress: 56 },
+                    { key: 'storage', sql: getSqlStorage(), progress: 70 },
+                    { key: 'migrations', sql: getSqlMigrations(), progress: 85 },
+                    { key: 'seed', sql: getSqlSeedData(), progress: 100 },
+                ];
+
+                let allSuccess = true;
+                let lastError = '';
+
+                for (const step of steps) {
+                    setProgressStep(step.key, 'running');
+                    try {
+                        await executeSql(url, serviceKey, step.sql);
+                        setProgressStep(step.key, 'done');
+                        document.getElementById('progress-bar').style.width = step.progress + '%';
+                    } catch (stepErr) {
+                        const msg = stepErr.message || String(stepErr);
+                        // "already exists" type errors are OK
+                        if (msg.includes('already exists') || msg.includes('duplicate') || msg.includes('42P07') || msg.includes('42710')) {
+                            setProgressStep(step.key, 'done');
+                            document.getElementById('progress-bar').style.width = step.progress + '%';
+                            continue;
+                        }
+                        setProgressStep(step.key, 'error');
+                        allSuccess = false;
+                        lastError = msg;
+                        break;
+                    }
+                }
+
+                if (allSuccess) {
+                    installComplete = true;
+                    document.getElementById('progress-bar').style.width = '100%';
+                    btnRun.style.display = 'none';
+                    const btnNext = document.getElementById('btn-step3-next');
+                    btnNext.style.display = '';
+                    btnBack.disabled = false;
+                    errorEl.style.display = 'none';
+                } else {
+                    // Show the manual copy-paste fallback
+                    document.getElementById('copy-sql-fallback').classList.add('show');
+                    btnRun.disabled = false;
+                    btnRun.innerHTML = '🔄 Retry Installation';
+                    btnBack.disabled = false;
+
+                    const btnNext = document.getElementById('btn-step3-next');
+                    btnNext.style.display = '';
+                    btnNext.textContent = 'I\'ve Run the SQL Manually → Continue';
+
+                    errorEl.style.display = 'block';
+                    errorEl.innerHTML = `<strong>⚠️ Automatic execution not available</strong><br>
+                        Your Supabase project doesn't allow direct SQL execution from the browser.<br>
+                        <strong>Solution:</strong> Click <strong>"Copy Full SQL"</strong> above, then paste and run it in your 
+                        <a href="https://supabase.com/dashboard" target="_blank" style="color:inherit;text-decoration:underline;">Supabase Dashboard</a> → <strong>SQL Editor</strong> → New Query → Paste → Run.<br>
+                        After that, click <strong>"I've Run the SQL Manually"</strong> to continue.`;
+                }
             }
         }
 
@@ -542,49 +565,66 @@
 
         // ─── Execute SQL via Supabase ─────────────────────────────
         async function executeSql(url, serviceKey, sql) {
-            // Use the Supabase SQL execution endpoint
-            const projectRef = url.replace('https://', '').replace('.supabase.co', '');
-            
-            // Try direct SQL execution via REST
-            const response = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': serviceKey,
-                    'Authorization': `Bearer ${serviceKey}`,
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({ query: sql })
-            });
-
-            if (response.ok) return;
-
-            // If exec_sql doesn't exist, try creating it first then use it
-            const errorText = await response.text();
-            
-            if (errorText.includes('exec_sql') || errorText.includes('could not find')) {
-                // Try creating the exec_sql function
-                const createFnRes = await fetch(`${url}/rest/v1/rpc/`, {
+            // Approach 1: Try Supabase internal SQL endpoint (/pg/query)
+            // This is used by Supabase Studio internally
+            try {
+                const pgRes = await fetch(`${url}/pg/query`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'apikey': serviceKey,
                         'Authorization': `Bearer ${serviceKey}`,
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({ query: sql })
                 });
 
-                // Fallback: use the Supabase's built-in SQL via the Management API
-                // POST to the pg endpoint
-                throw new Error('SQL execution not available via REST. Please use the "Copy SQL" button and run manually in Supabase SQL Editor.');
+                if (pgRes.ok) return;
+
+                const pgText = await pgRes.text();
+                // If it returned an SQL error (not a 404/CORS), the endpoint works but SQL failed
+                if (pgRes.status >= 400 && pgRes.status < 500 && !pgText.includes('not found') && !pgText.includes('Not Found')) {
+                    // Check if it's an acceptable error
+                    if (pgText.includes('already exists') || pgText.includes('duplicate')) return;
+                    throw new Error(pgText);
+                }
+            } catch (e) {
+                // If it's an actual SQL error (not network/CORS), rethrow
+                if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('NetworkError') && !e.message.includes('CORS') && !e.message.includes('not found') && !e.message.includes('Not Found')) {
+                    throw e;
+                }
+                // Otherwise, endpoint not available — try next approach
             }
 
-            // Check for "already exists" type errors which are OK
-            if (errorText.includes('already exists') || errorText.includes('duplicate') || errorText.includes('42P07')) {
-                return; // OK, table/policy already exists
+            // Approach 2: Try exec_sql RPC (if user created it manually)
+            try {
+                const rpcRes = await fetch(`${url}/rest/v1/rpc/exec_sql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': serviceKey,
+                        'Authorization': `Bearer ${serviceKey}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ query: sql })
+                });
+
+                if (rpcRes.ok) return;
+                
+                const rpcText = await rpcRes.text();
+                if (rpcText.includes('already exists') || rpcText.includes('duplicate')) return;
+                
+                // If exec_sql doesn't exist, fall through to next approach
+                if (!rpcText.includes('could not find') && !rpcText.includes('function') && !rpcText.includes('404')) {
+                    throw new Error(rpcText);
+                }
+            } catch (e) {
+                if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('could not find') && !e.message.includes('function')) {
+                    throw e;
+                }
             }
 
-            throw new Error(errorText || `HTTP ${response.status}`);
+            // Approach 3: No automatic execution available
+            throw new Error('SQL execution not available. Please copy the SQL and run it manually in Supabase SQL Editor.');
         }
 
         // ─── Create Admin Account ─────────────────────────────────
