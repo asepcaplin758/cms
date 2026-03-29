@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login — CMS</title>
+    <meta name="admin-page-name" content="Login" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <style>
+        .login-info-box {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: .6rem;
+            padding: .85rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: .8rem;
+            color: #1E40AF;
+            line-height: 1.6;
+        }
+
+        .login-info-box strong {
+            display: block;
+            margin-bottom: .3rem;
+            color: #1D4ED8;
+        }
+
+        .login-info-box code {
+            background: #DBEAFE;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: monospace;
+            font-size: .78rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text-muted);
+            font-size: .9rem;
+            line-height: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="login-page" role="main">
+        <div class="login-card">
+
+            <!-- Logo -->
+            <div class="login-logo">
+                <div class="logo-icon" aria-hidden="true">🎓</div>
+                <h1>Admin CMS</h1>
+                <p id="login-brand-title">Portfolio</p>
+            </div>
+
+
+
+
+            <!-- Error box -->
+            <div class="login-error" id="login-error" role="alert"></div>
+
+            <!-- Login form -->
+            <form id="login-form" novalidate aria-label="Admin login form">
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" placeholder="Enter your email address" required
+                        autocomplete="email" />
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" placeholder="••••••••" required
+                            autocomplete="current-password" />
+                        <button type="button" class="toggle-pw" id="toggle-pw"
+                            aria-label="Show/hide password">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="login-btn"
+                    style="width:100%;justify-content:center;margin-top:.5rem;">
+                    Sign In
+                </button>
+            </form>
+
+            <p style="text-align:center;margin-top:1.5rem;font-size:.82rem;color:var(--color-text-muted);">
+                <a href="../index.html" style="color:var(--color-primary);">← Back to website</a>
+            </p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from '../js/supabase.js';
+        import { requireSecretKey, adminUrl, loadSidebarBrand } from './admin.js';
+
+        // ── Verify secret key first ──────────────────────────────────
+        const keyValid = await requireSecretKey();
+        if (!keyValid) throw new Error('Invalid key');
+        await loadSidebarBrand();
+
+        // ── Show/hide password toggle ────────────────────────────────
+        document.getElementById('toggle-pw').addEventListener('click', () => {
+            const pw = document.getElementById('login-password');
+            pw.type = pw.type === 'password' ? 'text' : 'password';
+        });
+
+        // ── Redirect if already logged in (custom session) ─────────
+        const existing = sessionStorage.getItem('admin_session');
+        if (existing) {
+            try {
+                const s = JSON.parse(existing);
+                if (s?.id) { window.location.href = adminUrl('dashboard.html'); }
+            } catch { sessionStorage.removeItem('admin_session'); }
+        }
+
+        // ── Login form submit ───────────────────────────────────────
+        const form = document.getElementById('login-form');
+        const errorEl = document.getElementById('login-error');
+        const loginBtn = document.getElementById('login-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorEl.classList.remove('show');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in…';
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showError('Please enter your email and password.');
+                return;
+            }
+
+            try {
+                const { data: adminData, error: adminError } = await supabase
+                    .rpc('admin_login', { in_email: email, in_password: password });
+
+                if (adminError) {
+                    showError('Login service error: ' + adminError.message);
+                    return;
+                }
+
+                if (!adminData || adminData.length === 0) {
+                    showError('Invalid email or password. Please try again.');
+                    return;
+                }
+
+                const adminUser = adminData[0];
+
+                sessionStorage.setItem('admin_session', JSON.stringify({
+                    id: adminUser.id,
+                    email: adminUser.email,
+                    display_name: adminUser.display_name,
+                    role: adminUser.role,
+                    avatar_url: adminUser.avatar_url || null,
+                    login_at: new Date().toISOString(),
+                }));
+
+                try {
+                    await supabase.auth.signInWithPassword({ email, password });
+                } catch (_) { }
+
+                window.location.href = adminUrl('dashboard.html');
+
+            } catch (err) {
+                showError('Unexpected error: ' + (err.message || 'Please try again.'));
+            }
+        });
+
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+        }
+    </script>
+</body>
+
+</html>
