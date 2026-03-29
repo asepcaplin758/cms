@@ -106,7 +106,7 @@
 
         // ── Verify secret key first ──────────────────────────────────
         const keyValid = await requireSecretKey();
-        if (!keyValid) throw new Error('Invalid key');
+        if (!keyValid) { /* requireSecretKey() already redirects */ }
         await loadSidebarBrand();
 
         // ── Show/hide password toggle ────────────────────────────────
