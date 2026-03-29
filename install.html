@@ -916,70 +916,99 @@ ALTER TABLE public.lecturing            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.community_services   ENABLE ROW LEVEL SECURITY;
 
 -- ── PUBLIC READ POLICIES ──
-CREATE POLICY IF NOT EXISTS "public_read_profile"
-  ON public.profile FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_experience"
-  ON public.experience FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_research"
-  ON public.research FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_product"
-  ON public.product FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_contact_info"
-  ON public.contact_info FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_read_community_services"
-  ON public.community_services FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "public_insert_messages"
-  ON public.messages FOR INSERT WITH CHECK (true);
+DO $$ BEGIN
+  CREATE POLICY "public_read_profile" ON public.profile FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_read_experience" ON public.experience FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_read_research" ON public.research FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_read_product" ON public.product FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_read_contact_info" ON public.contact_info FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_read_community_services" ON public.community_services FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "public_insert_messages" ON public.messages FOR INSERT WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ── PUBLIC READ ON LECTURING ──
-CREATE POLICY IF NOT EXISTS "Allow public read on lecturing"
-  ON public.lecturing FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "Allow authenticated write on lecturing"
-  ON public.lecturing FOR ALL USING (true) WITH CHECK (true);
+DO $$ BEGIN
+  CREATE POLICY "Allow public read on lecturing" ON public.lecturing FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "Allow authenticated write on lecturing" ON public.lecturing FOR ALL USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ── AUTHENTICATED ADMIN POLICIES ──
-CREATE POLICY IF NOT EXISTS "admin_all_profile"
-  ON public.profile FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_experience"
-  ON public.experience FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_research"
-  ON public.research FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_product"
-  ON public.product FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_contact_info"
-  ON public.contact_info FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_messages"
-  ON public.messages FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_all_community_services"
-  ON public.community_services FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_users_self_read"
-  ON public.admin_users FOR SELECT USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "admin_users_authenticated_write"
-  ON public.admin_users FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY IF NOT EXISTS "auth_manage_settings"
-  ON public.admin_settings FOR ALL USING (auth.role() = 'authenticated');
+DO $$ BEGIN
+  CREATE POLICY "admin_all_profile" ON public.profile FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_experience" ON public.experience FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_research" ON public.research FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_product" ON public.product FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_contact_info" ON public.contact_info FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_messages" ON public.messages FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_all_community_services" ON public.community_services FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_users_self_read" ON public.admin_users FOR SELECT USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "admin_users_authenticated_write" ON public.admin_users FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "auth_manage_settings" ON public.admin_settings FOR ALL USING (auth.role() = 'authenticated');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ── ANON CMS ACCESS POLICIES ──
-CREATE POLICY IF NOT EXISTS "anon_manage_profile"
-  ON public.profile FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_experience"
-  ON public.experience FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_research"
-  ON public.research FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_product"
-  ON public.product FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_contact_info"
-  ON public.contact_info FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_messages"
-  ON public.messages FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_admin_users"
-  ON public.admin_users FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_manage_community_services"
-  ON public.community_services FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
-CREATE POLICY IF NOT EXISTS "anon_read_settings"
-  ON public.admin_settings FOR SELECT USING (true);
-CREATE POLICY IF NOT EXISTS "anon_manage_settings"
-  ON public.admin_settings FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_profile" ON public.profile FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_experience" ON public.experience FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_research" ON public.research FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_product" ON public.product FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_contact_info" ON public.contact_info FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_messages" ON public.messages FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_admin_users" ON public.admin_users FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_community_services" ON public.community_services FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_read_settings" ON public.admin_settings FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_manage_settings" ON public.admin_settings FOR ALL USING (auth.role() = 'anon') WITH CHECK (auth.role() = 'anon');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 `;
         }
 
